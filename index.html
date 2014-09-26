@@ -39,6 +39,12 @@
         stroke-width: .5px;
       }
 
+      .bikepath {
+       fill: none;
+       stroke: red;
+       stroke-width: 5;
+      }
+
     </style>
   </head>
   <body>
@@ -47,14 +53,15 @@
     </div>
     <script type="text/javascript">
 
-var width = 960,
-    height = 960;
+var width = 800,
+    height = 800;
+
 
 var projection = d3.geo.orthographic()
-    .scale(475)
-    .translate([width / 2, height / 2])
+    .scale(width/2-10)
+    .translate([width *0.5, height * 0.5])
     .clipAngle(90)
-    .precision(.1);
+    .precision(.1).rotate([-40,-30]);
 
 var path = d3.geo.path()
     .projection(projection);
@@ -84,21 +91,26 @@ svg.append("path")
     .attr("class", "graticule")
     .attr("d", path);
 
-var world = world50m;
+svg.insert("path", ".graticule")
+    .datum(topojson.feature(world50m, world50m.objects.land))
+    .attr("class", "land")
+    .attr("d", path);
 
-  svg.insert("path", ".graticule")
-      .datum(topojson.feature(world, world.objects.land))
-      .attr("class", "land")
-      .attr("d", path);
-
-  svg.insert("path", ".graticule")
-      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
-      .attr("class", "boundary")
-      .attr("d", path);
+svg.insert("path", ".graticule")
+    .datum(topojson.mesh(world50m, world50m.objects.countries, function(a, b) { return a !== b; }))
+    .attr("class", "boundary")
+    .attr("d", path);
 
 
 d3.select(self.frameElement).style("height", height + "px");
 
+var targetline = {"type": "LineString", "coordinates": [[0, 0], [0, 90] ] }
+
+svg.selectAll(".bikepath").data([targetline])
+.enter()
+.append("path")
+.attr("class","bikepath")
+.attr("d", path);
 
     </script>
   </body>
