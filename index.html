@@ -14,7 +14,7 @@
 
       .stroke {
         fill: none;
-        stroke: #000;
+        stroke: #ccc;
         stroke-width: 3px;
       }
 
@@ -30,7 +30,7 @@
       }
 
       .land {
-        fill: #222;
+        fill: #444;
       }
 
       .boundary {
@@ -42,7 +42,30 @@
       .bikepath {
        fill: none;
        stroke: red;
-       stroke-width: 5;
+       stroke-width: 2;
+      }
+
+      .currentPath {
+       fill: none;
+       stroke: green;
+       stroke-width: 3;
+      }
+
+      .position {
+        stroke: green;
+        stroke-width: 5;
+      }
+
+      .odometer {
+        font-family: Arial;
+        color: #000000;
+        font-size: 75px;
+        padding: 9;
+        letter-spacing: 0px;
+        
+        position: absolute;
+        top: 500px;
+        right: 100px;
       }
 
     </style>
@@ -50,6 +73,7 @@
   <body>
     <div id="body">
       <div id='js-rotation-example'></div>
+      <div class='odometer'></div>
     </div>
     <script type="text/javascript">
 
@@ -70,7 +94,8 @@ var graticule = d3.geo.graticule();
 
 var svg = d3.select("#js-rotation-example").append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height)
+    .on("mousedown", mousedown);
 
 
 svg.append("defs").append("path")
@@ -104,13 +129,66 @@ svg.insert("path", ".graticule")
 
 d3.select(self.frameElement).style("height", height + "px");
 
+var totalKm = 752.0; //km
+
 var targetline = {"type": "LineString", "coordinates": [[0, 0], [0, 90] ] }
+var currentLine = {"type": "LineString", "coordinates": [[0, 0], [0, 7] ] }
+var currentPos = {"type": "Point", "coordinates": [0,7]}
+ 
+var text = totalKm.toFixed(1) + " km";
+d3.select(".odometer").text(text);
 
 svg.selectAll(".bikepath").data([targetline])
 .enter()
 .append("path")
 .attr("class","bikepath")
 .attr("d", path);
+
+svg.selectAll(".currentLine").data([currentLine])
+.enter()
+.append("path")
+.attr("class","currentPath")
+.attr("d", path);
+
+svg.selectAll(".currentPos").data([currentPos])
+.enter()
+.append("path")
+.attr("class", "position")
+.attr("d", path);
+
+var feature = svg.selectAll("land");
+
+d3.select(window)
+    .on("mousemove", mousemove)
+    .on("mouseup", mouseup);
+
+var m0,
+    o0;
+
+function mousedown() {
+  m0 = [d3.event.pageX, d3.event.pageY];
+  o0 = projection.rotate();
+  d3.event.preventDefault();
+}
+
+function mousemove() {
+  if (m0) {
+    var m1 = [d3.event.pageX, d3.event.pageY],
+        o1 = [o0[0] - (m0[0] - m1[0]) / 8, o0[1] - (m1[1] - m0[1]) / 8];
+    projection.rotate(o1);
+
+    svg.selectAll(".land, .boundary, .bikepath, .currentPath, .position, .graticule")
+      .attr("d", path);
+  }
+}
+
+function mouseup() {
+  if (m0) {
+    mousemove();
+    m0 = null;
+  }
+}
+
 
     </script>
   </body>
