@@ -4,6 +4,8 @@
   <head>
     <script type="text/javascript" src="d3/d3.min.js"></script>
     <script type="text/javascript" src="d3/topojson.v1.min.js"></script>
+    <script type="text/javascript" src="lib/tabletop.js"></script>
+
     <script src="data/world-110m.json"></script>
       
     <style type="text/css">
@@ -58,14 +60,14 @@
 
       .odometer {
         font-family: 'Rockwell', 'Helvetica', 'Arial', 'serif';
-        color: #000000;
+        color: #fff;
         font-size: 75px;
-        padding: 9;
+        padding: 0;
         letter-spacing: 0px;
         
         position: absolute;
-        top: 300px;
-        right: 100px;
+        top: -50px;
+        right: 10px;
       }
 
     </style>
@@ -77,88 +79,11 @@
     </div>
     <script type="text/javascript">
 
-var width = 800,
-    height = 800;
+var feature, projection, path ;
 
-
-var projection = d3.geo.orthographic()
-    .scale(width/2-10)
-    .translate([width *0.5, height * 0.5])
-    .clipAngle(90)
-    .precision(.1).rotate([-40,-30]);
-
-var path = d3.geo.path()
-    .projection(projection);
-
-var graticule = d3.geo.graticule();
-
-var svg = d3.select("#js-rotation-example").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .on("mousedown", mousedown);
-
-
-svg.append("defs").append("path")
-    .datum({type: "Sphere"})
-    .attr("id", "sphere")
-    .attr("d", path);
-
-svg.append("use")
-    .attr("class", "stroke")
-    .attr("xlink:href", "#sphere");
-
-svg.append("use")
-    .attr("class", "fill")
-    .attr("xlink:href", "#sphere");
-
-svg.append("path")
-    .datum(graticule)
-    .attr("class", "graticule")
-    .attr("d", path);
-
-svg.insert("path", ".graticule")
-    .datum(topojson.feature(world50m, world50m.objects.land))
-    .attr("class", "land")
-    .attr("d", path);
-
-svg.insert("path", ".graticule")
-    .datum(topojson.mesh(world50m, world50m.objects.countries, function(a, b) { return a !== b; }))
-    .attr("class", "boundary")
-    .attr("d", path);
-
-
-d3.select(self.frameElement).style("height", height + "px");
-
-var totalKm = 2241.7; //km
-var naut = 1851.851851851;
-var latitude = (totalKm * 1000) / (naut * 60);
-
-var targetline = {"type": "LineString", "coordinates": [[10.4, 0], [0, 90] ] }
-var currentLine = {"type": "LineString", "coordinates": [[10.4, 0], [10.4, latitude] ] }
-var currentPos = {"type": "Point", "coordinates": [10.4,latitude]}
- 
-var text = "<p>" + totalKm.toFixed(1) + " km</p>";
-d3.select(".odometer").html(text);
-
-svg.selectAll(".bikepath").data([targetline])
-.enter()
-.append("path")
-.attr("class","bikepath")
-.attr("d", path);
-
-svg.selectAll(".currentLine").data([currentLine])
-.enter()
-.append("path")
-.attr("class","currentPath")
-.attr("d", path);
-
-svg.selectAll(".currentPos").data([currentPos])
-.enter()
-.append("path")
-.attr("class", "position")
-.attr("d", path);
-
-var feature = svg.selectAll(".land, .boundary, .bikepath, .currentPath, .position, .graticule");
+Tabletop.init( { key: '1mSuoK4u1-hvbMJEioY_LQ9rth9OscPAm8YV7A1EDdvs',
+                 callback: function(data, tabletop) { initData(data) },
+                 simpleSheet: true } )
 
 d3.select(window)
     .on("mousemove", mousemove)
@@ -189,6 +114,91 @@ function mouseup() {
   }
 }
 
+function initData(data) {
+    var totalKm = Number(data[0]['totalt']);
+    initSphere(totalKm);
+}
+
+function initSphere(distance) {
+  var width = 800,
+    height = 800;
+
+
+  projection = d3.geo.orthographic()
+      .scale(width/2-10)
+      .translate([width *0.5, height * 0.5])
+      .clipAngle(90)
+      .precision(.1).rotate([-40,-30]);
+
+  path = d3.geo.path()
+    .projection(projection);
+
+  var graticule = d3.geo.graticule();
+
+  var svg = d3.select("#js-rotation-example").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .on("mousedown", mousedown);
+
+
+  svg.append("defs").append("path")
+      .datum({type: "Sphere"})
+      .attr("id", "sphere")
+      .attr("d", path);
+
+  svg.append("use")
+      .attr("class", "stroke")
+      .attr("xlink:href", "#sphere");
+
+  svg.append("use")
+      .attr("class", "fill")
+      .attr("xlink:href", "#sphere");
+
+  svg.append("path")
+      .datum(graticule)
+      .attr("class", "graticule")
+      .attr("d", path);
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.feature(world50m, world50m.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.mesh(world50m, world50m.objects.countries, function(a, b) { return a !== b; }))
+      .attr("class", "boundary")
+      .attr("d", path);
+
+  var naut = 1851.851851851;
+  var latitude = (distance * 1000) / (naut * 60);
+
+  var targetline = {"type": "LineString", "coordinates": [[10.4, 0], [0, 90] ] }
+  var currentLine = {"type": "LineString", "coordinates": [[10.4, 0], [10.4, latitude] ] }
+  var currentPos = {"type": "Point", "coordinates": [10.4,latitude]}
+   
+  var text = "<p>" + distance.toFixed(1) + " km</p>";
+  d3.select(".odometer").html(text);
+
+  svg.selectAll(".bikepath").data([targetline])
+  .enter()
+  .append("path").style("stroke-dasharray", ("3, 3"))
+  .attr("class","bikepath")
+  .attr("d", path);
+
+  svg.selectAll(".currentLine").data([currentLine])
+  .enter()
+  .append("path")
+  .attr("class","currentPath")
+  .attr("d", path);
+
+  svg.selectAll(".currentPos").data([currentPos])
+  .enter()
+  .append("path")
+  .attr("class", "position")
+  .attr("d", path);
+
+  feature = svg.selectAll(".land, .boundary, .bikepath, .currentPath, .position, .graticule");
+}
 
     </script>
   </body>
