@@ -129,16 +129,15 @@ svg.insert("path", ".graticule")
 
 d3.select(self.frameElement).style("height", height + "px");
 
-var totalKm = 2500.0; //km
+var totalKm = 2241.7; //km
 var naut = 1851.851851851;
 var latitude = (totalKm * 1000) / (naut * 60);
-var progress = totalKm/100; //percent
 
 var targetline = {"type": "LineString", "coordinates": [[10.4, 0], [0, 90] ] }
 var currentLine = {"type": "LineString", "coordinates": [[10.4, 0], [10.4, latitude] ] }
 var currentPos = {"type": "Point", "coordinates": [10.4,latitude]}
  
-var text = "<p>" + totalKm.toFixed(1) + " km</p><p>" + progress.toFixed(2) +"%</p>";
+var text = "<p>" + totalKm.toFixed(1) + " km</p>";
 d3.select(".odometer").html(text);
 
 svg.selectAll(".bikepath").data([targetline])
