@@ -4,7 +4,7 @@
   <head>
     <script type="text/javascript" src="d3/d3.min.js"></script>
     <script type="text/javascript" src="d3/topojson.v1.min.js"></script>
-    <script src="data/world-50m.json"></script>
+    <script src="data/world-110m.json"></script>
 
     <style type="text/css">
 
@@ -19,7 +19,7 @@
       }
 
       .fill {
-        fill: #fff;
+        fill: #ccc;
       }
 
       .graticule {
@@ -64,7 +64,7 @@
         letter-spacing: 0px;
         
         position: absolute;
-        top: 500px;
+        top: 300px;
         right: 100px;
       }
 
@@ -130,13 +130,14 @@ svg.insert("path", ".graticule")
 d3.select(self.frameElement).style("height", height + "px");
 
 var totalKm = 752.0; //km
+var progress = totalKm/100; //percent
 
-var targetline = {"type": "LineString", "coordinates": [[0, 0], [0, 90] ] }
-var currentLine = {"type": "LineString", "coordinates": [[0, 0], [0, 7] ] }
-var currentPos = {"type": "Point", "coordinates": [0,7]}
+var targetline = {"type": "LineString", "coordinates": [[10.4, 0], [0, 90] ] }
+var currentLine = {"type": "LineString", "coordinates": [[10.4, 0], [10.4, 7] ] }
+var currentPos = {"type": "Point", "coordinates": [10.4,7]}
  
-var text = totalKm.toFixed(1) + " km";
-d3.select(".odometer").text(text);
+var text = "<p>" + totalKm.toFixed(1) + " km</p><p>" + progress.toFixed(2) +"%</p>";
+d3.select(".odometer").html(text);
 
 svg.selectAll(".bikepath").data([targetline])
 .enter()
@@ -156,7 +157,7 @@ svg.selectAll(".currentPos").data([currentPos])
 .attr("class", "position")
 .attr("d", path);
 
-var feature = svg.selectAll("land");
+var feature = svg.selectAll(".land, .boundary, .bikepath, .currentPath, .position, .graticule");
 
 d3.select(window)
     .on("mousemove", mousemove)
@@ -176,9 +177,7 @@ function mousemove() {
     var m1 = [d3.event.pageX, d3.event.pageY],
         o1 = [o0[0] - (m0[0] - m1[0]) / 8, o0[1] - (m1[1] - m0[1]) / 8];
     projection.rotate(o1);
-
-    svg.selectAll(".land, .boundary, .bikepath, .currentPath, .position, .graticule")
-      .attr("d", path);
+    feature.attr("d", path);
   }
 }
 
