@@ -81,7 +81,7 @@
 
 var feature, projection, path ;
 
-Tabletop.init( { key: '1mSuoK4u1-hvbMJEioY_LQ9rth9OscPAm8YV7A1EDdvs',
+Tabletop.init( { key: '0AtfTjSZCvAfkdFRBNnNPbXQ5UlRCV3dGZ2VGdmJiaEE',
                  callback: function(data, tabletop) { initData(data) },
                  simpleSheet: true } )
 
@@ -115,7 +115,7 @@ function mouseup() {
 }
 
 function initData(data) {
-    var totalKm = Number(data[0]['totalt']);
+    var totalKm = Number(data[0]['totalt'].replace(/,/g,'.'));
     initSphere(totalKm);
 }
 
