@@ -55,7 +55,7 @@
 
       .position {
         stroke: #ff6400;
-        stroke-width: 5;
+        stroke-width: 6;
       }
 
       .odometer {
@@ -68,6 +68,23 @@
         position: absolute;
         top: -50px;
         right: 10px;
+      }
+      .svg-container {
+          display: inline-block;
+          position: relative;
+          width: 80vw;
+          height: 100vh;
+          max-width: 130vh;
+          vertical-align: top;
+          overflow: hidden;
+              top:0;bottom:0; /* vertical center */
+    left:0;right:0; /* horizontal center */
+      }
+      .svg-content-responsive {
+          display: inline-block;
+          position: absolute;
+          top: 0;
+          left: 0;
       }
 
     </style>
@@ -128,16 +145,18 @@ function initSphere(distance) {
       .scale(width/2-10)
       .translate([width *0.5, height * 0.5])
       .clipAngle(90)
-      .precision(.1).rotate([-40,-30]);
+      .precision(.1).rotate([-40,-20]);
 
   path = d3.geo.path()
     .projection(projection);
 
   var graticule = d3.geo.graticule();
 
-  var svg = d3.select("#js-rotation-example").append("svg")
-      .attr("width", width)
-      .attr("height", height)
+  var svg = d3.select("#js-rotation-example").append("div")
+      .classed("svg-container", true).append("svg")
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("viewBox", "0 0 800 800")
+      .classed("svg-content-responsive", true)
       .on("mousedown", mousedown);
 
 
