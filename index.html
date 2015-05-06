@@ -47,6 +47,12 @@
        stroke-width: 2;
       }
 
+      .equator {
+       fill: none;
+       stroke:  #777;
+       stroke-width: 1.5;
+      }
+
       .currentPath {
        fill: none;
        stroke: #ff6400;
@@ -194,9 +200,16 @@ function initSphere(distance) {
   var targetline = {"type": "LineString", "coordinates": [[10.4, 0], [0, 90] ] }
   var currentLine = {"type": "LineString", "coordinates": [[10.4, 0], [10.4, latitude] ] }
   var currentPos = {"type": "Point", "coordinates": [10.4,latitude]}
-   
+  
+  var equator = {"type": "LineString", "coordinates": [ [-180,0], [-90,0], [0,0],  [90,0], [135,0], [180,0] ] }
+
   var text = "<p>" + distance.toFixed(1) + " km</p>";
   d3.select(".odometer").html(text);
+
+  svg.selectAll(".equator").data([equator])
+    .enter().append("path")
+    .attr("class", "equator")
+    .attr("d", path);
 
   svg.selectAll(".bikepath").data([targetline])
   .enter()
@@ -216,7 +229,7 @@ function initSphere(distance) {
   .attr("class", "position")
   .attr("d", path);
 
-  feature = svg.selectAll(".land, .boundary, .bikepath, .currentPath, .position, .graticule");
+  feature = svg.selectAll(".land, .boundary, .equator, .bikepath, .currentPath, .position, .graticule ");
 }
 
     </script>
