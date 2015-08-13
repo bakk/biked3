@@ -5,6 +5,7 @@
     <script type="text/javascript" src="d3/d3.min.js"></script>
     <script type="text/javascript" src="d3/topojson.v1.min.js"></script>
     <script type="text/javascript" src="lib/tabletop.js"></script>
+    <script type="text/javascript" src="lib/GreatCircle.js"></script>
 
     <script src="data/world-110m.json"></script>
       
@@ -194,13 +195,17 @@ function initSphere(distance) {
       .attr("class", "boundary")
       .attr("d", path);
 
-  var naut = 1851.851851851;
-  var latitude = (distance * 1000) / (naut * 60);
+  //var naut = 1851.851851851;
+  //var latitude = (distance * 1000) / (naut * 60)
+  //latitude = latitude-54.5;
 
-  var targetline = {"type": "LineString", "coordinates": [[10.4, 0], [0, 90] ] }
-  var currentLine = {"type": "LineString", "coordinates": [[10.4, 0], [10.4, latitude] ] }
-  var currentPos = {"type": "Point", "coordinates": [10.4,latitude]}
-  
+  var bearing = GreatCircle.bearing(63,10.4,-54.5,3.3);
+  var current_pos = GreatCircle.destination(63,10.4,bearing,distance)
+
+  var targetline = {"type": "LineString", "coordinates": [[3.3, -54.5], [10.4, 63] ] }
+  var currentLine = {"type": "LineString", "coordinates": [[10.4,63],[current_pos.LON, current_pos.LAT]] }
+  var currentPos = {"type": "Point", "coordinates": [current_pos.LON,current_pos.LAT]}
+  var bouvet_island = {"type": "Point", "coordinates": [3.3,-54.5]}
   var equator = {"type": "LineString", "coordinates": [ [-180,0], [-90,0], [0,0],  [90,0], [135,0], [180,0] ] }
 
   var text = "<p>" + distance.toFixed(1) + " km</p>";
@@ -229,7 +234,13 @@ function initSphere(distance) {
   .attr("class", "position")
   .attr("d", path);
 
-  feature = svg.selectAll(".land, .boundary, .equator, .bikepath, .currentPath, .position, .graticule ");
+  svg.selectAll(".bouvet").data([bouvet_island])
+  .enter()
+  .append("path")
+  .attr("class", "position")
+  .attr("d", path);
+
+  feature = svg.selectAll(".land, .boundary, .equator, .bikepath, .currentPath, .position, .graticule");
 }
 
     </script>
