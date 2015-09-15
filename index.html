@@ -68,7 +68,7 @@
       .odometer {
         font-family: 'Rockwell', 'Helvetica', 'Arial', 'serif';
         color: #fff;
-        font-size: 75px;
+        font-size: 65px;
         padding: 0;
         letter-spacing: 0px;
         
@@ -79,9 +79,9 @@
       .svg-container {
           display: inline-block;
           position: relative;
-          width: 80vw;
+          width: 100vw;
           height: 100vh;
-          max-width: 130vh;
+          max-width: 100vh;
           vertical-align: top;
           overflow: hidden;
               top:0;bottom:0; /* vertical center */
@@ -152,7 +152,7 @@ function initSphere(distance) {
       .scale(width/2-10)
       .translate([width *0.5, height * 0.5])
       .clipAngle(90)
-      .precision(.1).rotate([-40,-20]);
+      .precision(.1).rotate([-40,20]);
 
   path = d3.geo.path()
     .projection(projection);
@@ -199,16 +199,21 @@ function initSphere(distance) {
   //var latitude = (distance * 1000) / (naut * 60)
   //latitude = latitude-54.5;
 
-  var bearing = GreatCircle.bearing(63,10.4,-54.5,3.3);
+  var bearing = GreatCircle.bearing(63,10.4,-90,0);
   var current_pos = GreatCircle.destination(63,10.4,bearing,distance)
-
-  var targetline = {"type": "LineString", "coordinates": [[3.3, -54.5], [10.4, 63] ] }
+ 
+  var remaining = 17012-distance;
+  if (remaining<0) {
+    remaining = 0;
+  }
+  //console.log(GreatCircle.distance(63,10.4,-90,0));
+  var targetline = {"type": "LineString", "coordinates": [[0, -90], [10.4, 63] ] }
   var currentLine = {"type": "LineString", "coordinates": [[10.4,63],[current_pos.LON, current_pos.LAT]] }
   var currentPos = {"type": "Point", "coordinates": [current_pos.LON,current_pos.LAT]}
-  var bouvet_island = {"type": "Point", "coordinates": [3.3,-54.5]}
+  var bouvet_island = {"type": "Point", "coordinates": [0,-90]}
   var equator = {"type": "LineString", "coordinates": [ [-180,0], [-90,0], [0,0],  [90,0], [135,0], [180,0] ] }
 
-  var text = "<p>" + distance.toFixed(1) + " km</p>";
+  var text = "<p>" + distance.toFixed(0) + " km</p><p style='font-size: 35px;'> &Delta;" + remaining.toFixed(1) + " km </p>";
   d3.select(".odometer").html(text);
 
   svg.selectAll(".equator").data([equator])
