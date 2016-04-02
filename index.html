@@ -139,7 +139,7 @@ function mouseup() {
 }
 
 function initData(data) {
-    var totalKm = Number(data[0]['totalt'].replace(/,/g,'.'));
+    var totalKm = Number(data[0]['sykkel2016'].replace(/,/g,'.'));
     initSphere(totalKm);
 }
 
@@ -152,7 +152,7 @@ function initSphere(distance) {
       .scale(width/2-10)
       .translate([width *0.5, height * 0.5])
       .clipAngle(90)
-      .precision(.1).rotate([-40,20]);
+      .precision(.1).rotate([-30,-20]);
 
   path = d3.geo.path()
     .projection(projection);
@@ -195,22 +195,22 @@ function initSphere(distance) {
       .attr("class", "boundary")
       .attr("d", path);
 
-  //var naut = 1851.851851851;
-  //var latitude = (distance * 1000) / (naut * 60)
-  //latitude = latitude-54.5;
+  if (distance > 20000) {
+    distance = 20000; 
+  }
 
-  var bearing = GreatCircle.bearing(63,10.4,-90,0);
-  var current_pos = GreatCircle.destination(63,10.4,bearing,distance)
- 
-  var remaining = 17012-distance;
+  var bearing = GreatCircle.bearing(90,0,0,3.3);
+  var current_pos = GreatCircle.destination(90,3.3,180,distance)
+  current_pos.LON = 3.3;
+  var remaining = 20000-distance;
   if (remaining<0) {
     remaining = 0;
   }
-  //console.log(GreatCircle.distance(63,10.4,-90,0));
-  var targetline = {"type": "LineString", "coordinates": [[0, -90], [10.4, 63] ] }
-  var currentLine = {"type": "LineString", "coordinates": [[10.4,63],[current_pos.LON, current_pos.LAT]] }
+  var targetline = {"type": "LineString", "coordinates": [[0, -90], [3.3, 0] ] } ;
+  var targetline2 = {"type": "LineString", "coordinates": [[0, 90], [3.3, 0] ] } ;
+  var currentLine = {"type": "LineString", "coordinates": [[3.3,90],[current_pos.LON, current_pos.LAT]] }
   var currentPos = {"type": "Point", "coordinates": [current_pos.LON,current_pos.LAT]}
-  var bouvet_island = {"type": "Point", "coordinates": [0,-90]}
+  var target_point = {"type": "Point", "coordinates": [0,-90]}
   var equator = {"type": "LineString", "coordinates": [ [-180,0], [-90,0], [0,0],  [90,0], [135,0], [180,0] ] }
 
   var text = "<p>" + distance.toFixed(0) + " km</p><p style='font-size: 35px;'> &Delta;" + remaining.toFixed(1) + " km </p>";
@@ -221,7 +221,7 @@ function initSphere(distance) {
     .attr("class", "equator")
     .attr("d", path);
 
-  svg.selectAll(".bikepath").data([targetline])
+  svg.selectAll(".bikepath").data([targetline, targetline2])
   .enter()
   .append("path").style("stroke-dasharray", ("3, 3"))
   .attr("class","bikepath")
@@ -239,7 +239,7 @@ function initSphere(distance) {
   .attr("class", "position")
   .attr("d", path);
 
-  svg.selectAll(".bouvet").data([bouvet_island])
+  svg.selectAll(".bouvet").data([target_point])
   .enter()
   .append("path")
   .attr("class", "position")
