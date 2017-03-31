@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -79,13 +78,13 @@
       .svg-container {
           display: inline-block;
           position: relative;
-          width: 100vw;
-          height: 100vh;
-          max-width: 100vh;
+          width: 90vw;
+          height: 90vh;
+          max-width: 90vh;
           vertical-align: top;
           overflow: hidden;
-              top:0;bottom:0; /* vertical center */
-    left:0;right:0; /* horizontal center */
+          top:4vw;bottom:0; /* vertical center */
+          left:4vw;right:0; /* horizontal center */
       }
       .svg-content-responsive {
           display: inline-block;
@@ -139,7 +138,7 @@ function mouseup() {
 }
 
 function initData(data) {
-    var totalKm = Number(data[0]['sykkel2016'].replace(/,/g,'.'));
+    var totalKm = Number(data[0]['sykkel2017'].replace(/,/g,'.'));
     initSphere(totalKm);
 }
 
@@ -195,22 +194,30 @@ function initSphere(distance) {
       .attr("class", "boundary")
       .attr("d", path);
 
-  if (distance > 20000) {
-    distance = 20000; 
+  if (distance > 30000) {
+    distance = 30000; 
   }
 
-  var bearing = GreatCircle.bearing(90,0,0,3.3);
-  var current_pos = GreatCircle.destination(90,3.3,180,distance)
-  current_pos.LON = 3.3;
-  var remaining = 20000-distance;
+  var lon = 10.4;
+  var current_pos, currentLine;
+
+  if (distance < 20000) {
+    current_pos = GreatCircle.destination(90,lon,180,distance);
+    current_pos.LON = lon;
+    currentLine = {"type": "LineString", "coordinates": [[lon,90],[current_pos.LON, current_pos.LAT]] }
+  } else {
+    current_pos = GreatCircle.destination(-90,lon,180,distance-20000);
+    current_pos.LON = lon+180;
+    currentLine = {"type": "LineString", "coordinates": [[lon,90], [lon,0], [lon,-90], [current_pos.LON, current_pos.LAT]] }
+  }
+
+  var remaining = 30000-distance;
   if (remaining<0) {
     remaining = 0;
   }
-  var targetline = {"type": "LineString", "coordinates": [[0, -90], [3.3, 0] ] } ;
-  var targetline2 = {"type": "LineString", "coordinates": [[0, 90], [3.3, 0] ] } ;
-  var currentLine = {"type": "LineString", "coordinates": [[3.3,90],[current_pos.LON, current_pos.LAT]] }
+  var targetline = {"type": "LineString", "coordinates": [[-180 + lon, 0],[0, -90], [lon, 0], [180, 90] ] } ;
   var currentPos = {"type": "Point", "coordinates": [current_pos.LON,current_pos.LAT]}
-  var target_point = {"type": "Point", "coordinates": [0,-90]}
+  var target_point = {"type": "Point", "coordinates": [180 + lon,0]}
   var equator = {"type": "LineString", "coordinates": [ [-180,0], [-90,0], [0,0],  [90,0], [135,0], [180,0] ] }
 
   var text = "<p>" + distance.toFixed(0) + " km</p><p style='font-size: 35px;'> &Delta;" + remaining.toFixed(1) + " km </p>";
@@ -221,7 +228,7 @@ function initSphere(distance) {
     .attr("class", "equator")
     .attr("d", path);
 
-  svg.selectAll(".bikepath").data([targetline, targetline2])
+  svg.selectAll(".bikepath").data([targetline])
   .enter()
   .append("path").style("stroke-dasharray", ("3, 3"))
   .attr("class","bikepath")
